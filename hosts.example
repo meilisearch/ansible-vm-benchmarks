@@ -1,12 +1,13 @@
 # address of each instances where datasets have to be tested.
 # name tag is used to create the resulted file.
-11.11.11.11 name=M
-22.22.22.22 name=S
-33.33.33.33 name=XS
+# user tag is the used to connect via ssh to the instance (equivalent to `ssh user@address`).
+11.11.11.11 name=M  user=root
+22.22.22.22 name=S  user=root
+33.33.33.33 name=XS user=root
 
 # one of the benchmark instance need to be assigned to compilation,
 # this machine will be used to compile meilisearch and will share the binary
 # to the others instances. The compilation Instance is part of the benchmark Instance, and so,
 # it will run the indexing of each dataset too.
 [compilation]
-44.44.44.44 name=L
+44.44.44.44 name=L  user=root

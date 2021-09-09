@@ -24,7 +24,7 @@
   # retry while the curl response contains "processing",
   # if anything else appends (success, failure, or no response), the retry loop stop.
 - name: Fetch {{ dataset.name }} results
-  shell: curl -s -X GET 'http://{{ inventory_hostname }}:7700/indexes/benchmarks/updates' | tee results/{{ dataset.name }}-{{ hostvars[inventory_hostname].typology }}-{{ version }}.json
+  shell: curl -s -X GET 'http://{{ inventory_hostname }}:7700/indexes/benchmarks/updates' | tee results/{{ dataset.name }}-{{ hostvars[inventory_hostname].name }}-{{ version }}.json
   register: result
   until: result is not regex("(enqueued\W|processing\W)")
   retries: 200
