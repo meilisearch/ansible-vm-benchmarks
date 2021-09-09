@@ -1,0 +1,26 @@
+# version used for results file name
+version: v0.21.0
+# Meilisearch commit SHA or tag used for indexing (default: {{ version }})
+git_tag: "{{ version }}"
+# Path of the meilisearch git repository on the compilation Instance.
+meilisearch_path: /root/MeiliSearch
+# list of the datasets to benchmark
+datasets:
+  #
+  # non-batched example
+  # displayed name of the dataset
+  - name: movies
+    # directory where the dataset file is locally
+    directory: .
+    # file name of the dataset
+    file_name: movies.json
+  #
+  # batched example
+  # displayed name of the dataset
+  - name: songs-500Mb-batched
+    # directory where the dataset batched files are locally
+    directory: ./songs-500Mb
+    # use "*" to select all files in the dataset directory
+    file_name: "*.json"
+  #
+  # - [..] any dataset that should be tested

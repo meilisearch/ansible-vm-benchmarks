@@ -1,0 +1,32 @@
+---
+- name: Kill meilisearch
+  shell: pkill meilisearch || true
+- name: Delete DB
+  file:
+    state: absent
+    path: ./data.ms
+- name: Run MeiliSearch
+  shell: ./meilisearch --db-path ./data.ms --http-addr '0.0.0.0:7700' --http-payload-size-limit '2147483648' # 2GiB
+  async: 1000
+  poll: 0
+- name: Create results folder
+  shell: mkdir -p results
+  delegate_to: 127.0.0.1
+- name: List chunks
+  shell: ls {{ dataset.directory }}/{{ dataset.file_name }}
+  register: chunks
+  delegate_to: 127.0.0.1
+- name: Send documents
+  shell: curl -s -X POST 'http://{{ inventory_hostname }}:7700/indexes/benchmarks/documents' --data-binary @{{ item }}
+  delegate_to: 127.0.0.1
+  loop: "{{ chunks.stdout_lines }}"
+
+  # retry while the curl response contains "processing",
+  # if anything else appends (success, failure, or no response), the retry loop stop.
+- name: Fetch {{ dataset.name }} results
+  shell: curl -s -X GET 'http://{{ inventory_hostname }}:7700/indexes/benchmarks/updates' | tee results/{{ dataset.name }}-{{ hostvars[inventory_hostname].typology }}-{{ version }}.json
+  register: result
+  until: result is not regex("(enqueued\W|processing\W)")
+  retries: 200
+  delay: 10
+  delegate_to: 127.0.0.1

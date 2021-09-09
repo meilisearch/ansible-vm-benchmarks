@@ -1,0 +1,45 @@
+---
+- name: Compile Meilisearch and Fetch resulted binary
+  hosts: compilation
+  vars_files:
+    - config.yaml
+  remote_user: root
+  tasks:
+    - name: Git fetch
+      shell:
+        cmd: git fetch --all
+        chdir: "{{ meilisearch_path }}"
+    - name: Clean repository
+      shell:
+        cmd: git checkout .
+        chdir: "{{ meilisearch_path }}"
+    - name: Checkout on target
+      shell:
+        cmd: git checkout {{ git_tag }}
+        chdir: "{{ meilisearch_path }}"
+    - name: Compile MeiliSearch
+      shell:
+        cmd: cargo build --release
+        chdir: "{{ meilisearch_path }}"
+    - name: Fetch the built binary
+      run_once: yes
+      fetch: src={{ meilisearch_path }}/target/release/meilisearch dest=/tmp/ flat=yes
+- name: Copy Meilisearch
+  hosts: all
+  remote_user: root
+  tasks:
+    - name: Copy the built binary from host
+      copy: src=/tmp/meilisearch dest=~/
+    - name: Add execution rights
+      shell: chmod +x meilisearch
+
+- name: Index datasets
+  vars_files:
+    - config.yaml
+  hosts: all
+  remote_user: root
+  tasks:
+    - include_tasks: index-dataset.yaml
+      loop: "{{ datasets }}"
+      loop_control:
+        loop_var: dataset
